@@ -1,0 +1,59 @@
+{
+  "name": "demo-dev",
+  "version": "0.1.0",
+  "description": "Diff-aware PR demo generator for web apps with Playwright capture, Remotion rendering, and an Agent Skill.",
+  "type": "module",
+  "bin": {
+    "demo-dev": "./bin/demo-dev.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "README.md",
+    "demo.dev.config.example.json",
+    "tsconfig.json"
+  ],
+  "keywords": ["pi-package", "agent-skill", "pr-demo", "remotion", "playwright"],
+  "engines": {
+    "node": ">=20"
+  },
+  "pi": {
+    "skills": ["./skills"]
+  },
+  "scripts": {
+    "demo-dev": "node ./bin/demo-dev.js",
+    "init": "tsx src/cli.ts init",
+    "doctor": "tsx src/cli.ts doctor",
+    "config": "tsx src/cli.ts config",
+    "providers": "tsx src/cli.ts providers",
+    "plan": "tsx src/cli.ts plan",
+    "probe": "tsx src/cli.ts probe",
+    "auth:bootstrap": "tsx src/cli.ts auth:bootstrap",
+    "capture": "tsx src/cli.ts capture",
+    "voice": "tsx src/cli.ts voice",
+    "manifest": "tsx src/cli.ts manifest",
+    "render": "tsx src/cli.ts render",
+    "comment": "tsx src/cli.ts comment",
+    "pr-demo": "tsx src/cli.ts pr-demo",
+    "typecheck": "tsc --noEmit",
+    "remotion:studio": "remotion studio src/render/remotion/index.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/media": "^4.0.0",
+    "@remotion/renderer": "^4.0.0",
+    "playwright": "^1.52.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "^4.0.0",
+    "tsx": "^4.19.3",
+    "zod": "3.22.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.30",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules/
+artifacts/
+artifacts-*/
+public/__demo_assets__/
+tmp/
+.playwright/
+.expect/
+demo.dev.config.json
+.DS_Store
+.env
+.env.local
+.env.*
+!.env.example
+dist/
+coverage/
+*.log
