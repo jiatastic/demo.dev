@@ -129,6 +129,17 @@ export const runDoctor = async (options: {
     checks.push({ label: "storageState", status: "skip", detail: "No storage state configured" });
   }
 
+  const bgmPath = process.env.DEMO_BGM_PATH;
+  if (bgmPath) {
+    checks.push(
+      (await fileExists(resolve(process.cwd(), bgmPath)))
+        ? { label: "bgm", status: "pass", detail: bgmPath }
+        : { label: "bgm", status: "warn", detail: `${bgmPath} is configured but does not exist` },
+    );
+  } else {
+    checks.push({ label: "bgm", status: "skip", detail: "No background music configured" });
+  }
+
   const failures = checks.filter((check) => check.status === "fail");
   const warnings = checks.filter((check) => check.status === "warn");
 

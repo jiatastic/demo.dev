@@ -174,10 +174,21 @@ export interface RenderScene {
   visualGroupKey?: string;
 }
 
+export interface RenderBgm {
+  path?: string;
+  src?: string;
+  assetPath?: string;
+  volume?: number;
+  ducking?: number;
+  fadeInFrames?: number;
+  fadeOutFrames?: number;
+}
+
 export interface RenderManifest {
   title: string;
   fps: number;
   width: number;
   height: number;
   scenes: RenderScene[];
+  bgm?: RenderBgm;
 }

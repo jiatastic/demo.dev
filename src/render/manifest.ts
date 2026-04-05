@@ -8,6 +8,13 @@ const HEIGHT = 900;
 const LEAD_IN_FRAMES = 18;
 const HOLD_FRAMES = 12;
 
+const readNumberEnv = (name: string, fallback: number) => {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 const visualGroupKeyFor = (capture: CaptureArtifact | undefined, scene: DemoPlan["scenes"][number]) => {
   const rawUrl = capture?.url ?? scene.url;
   try {
@@ -25,6 +32,9 @@ export const buildRenderManifest = async (
 ): Promise<RenderManifest> => {
   const stageAsset = await createAssetStager(plan.title);
   const captureBySceneId = new Map(captures.map((capture) => [capture.sceneId, capture]));
+  const bgmPath = process.env.DEMO_BGM_PATH;
+  const bgmAssetPath = await stageAsset(bgmPath, "bgm-track.mp3");
+  const bgmSrc = !bgmAssetPath && bgmPath ? await fileToDataUri(bgmPath).catch(() => undefined) : undefined;
 
   let previousVisualGroupKey: string | undefined;
   let sharedVisualCapture: CaptureArtifact | undefined;
@@ -98,5 +108,16 @@ export const buildRenderManifest = async (
     width: WIDTH,
     height: HEIGHT,
     scenes,
+    bgm: bgmPath
+      ? {
+          path: bgmPath,
+          src: bgmSrc,
+          assetPath: bgmAssetPath,
+          volume: readNumberEnv("DEMO_BGM_VOLUME", 0.16),
+          ducking: readNumberEnv("DEMO_BGM_DUCKING", 0.3),
+          fadeInFrames: Math.max(0, Math.round((readNumberEnv("DEMO_BGM_FADE_IN_MS", 700) / 1000) * FPS)),
+          fadeOutFrames: Math.max(0, Math.round((readNumberEnv("DEMO_BGM_FADE_OUT_MS", 1200) / 1000) * FPS)),
+        }
+      : undefined,
   };
 };

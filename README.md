@@ -1,137 +1,175 @@
+<div align="center">
+
 # demo.dev
 
-An original, multi-project PR demo generator for web apps.
+### Turn pull requests into polished product demos
 
-**PR opened -> read diff -> plan product walkthrough -> capture browser states -> synthesize voice -> render video with Remotion**
+[![Node >=20](https://img.shields.io/badge/node-%3E%3D20-111827?style=flat-square)](#installation)
+[![TypeScript](https://img.shields.io/badge/typescript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](#installation)
+[![Playwright](https://img.shields.io/badge/playwright-browser_capture-2EAD33?style=flat-square&logo=playwright&logoColor=white)](#what-demo-dev-does)
+[![Remotion](https://img.shields.io/badge/remotion-video_rendering-black?style=flat-square)](#what-demo-dev-does)
+[![Agent Skill](https://img.shields.io/badge/agent-ready-7C3AED?style=flat-square)](#agent-skill)
 
-This is not a PodPitch-only script. It is a reusable engine that each repo can configure with its own `demo.dev.config.json`.
+`demo.dev` is a diff-aware demo generator for web apps.  
+It reads a PR, plans what matters, captures the real product in the browser, and renders a clean video.
 
-## Design principles
+**PR opened → read diff → plan scenes → probe pages → capture product states → add voice / music → render mp4**
 
-Instead of copying QA tools, demo.dev borrows a few strong ideas and applies them to product storytelling:
+</div>
 
-1. **Diff-aware**: read the diff first, then decide what to show.
-2. **Browser evidence first**: validate against the real app before packaging the video.
-3. **Decoupled pipeline**: planner, probe, capture, voice, and render can evolve independently.
+---
 
-## What is implemented today
+## Table of contents
 
-- `src/planner`
-  - heuristic planner
-  - LLM planner through OpenAI-compatible and CLI-based providers
-  - refinement step using real page probes
-  - project-level hints such as `preferredRoutes` and `featureHints`
-- `src/probe`
-  - opens scene pages
-  - captures headings, text previews, and interactive elements
-  - follows one likely next action for a deeper probe
-- `src/capture`
-  - Playwright execution with exploration pass and recording pass
-  - session storage state reuse
-  - scene-level `.webm` recordings and screenshots
-  - supports `navigate / click / fill / hover / select / press / waitForText / waitForUrl / scroll / scrollIntoView / dragSelect`
-- `src/voice`
-  - narration script generation
-  - ElevenLabs / OpenAI / local macOS `say` fallback
-- `src/render`
-  - render manifest generation
-  - staged assets in `public/__demo_assets__`
-  - Remotion composition and mp4 output
-  - editorial camera treatment and grouped screen continuity
+- [Why demo.dev exists](#why-demo-dev-exists)
+- [What demo.dev does](#what-demo-dev-does)
+- [At a glance](#at-a-glance)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Example config](#example-config)
+- [CLI](#cli)
+- [Typical workflows](#typical-workflows)
+- [Outputs](#outputs)
+- [Background music](#background-music)
+- [AI providers](#ai-providers)
+- [Voice / TTS](#voice--tts)
+- [Auth and storage state](#auth-and-storage-state)
+- [GitHub workflow](#github-workflow)
+- [Agent Skill](#agent-skill)
+- [Publishing notes](#publishing-notes)
+- [Current limitations](#current-limitations)
+- [Roadmap](#roadmap)
+
+---
+
+## Why demo.dev exists
+
+Code review usually answers:
+
+> **“Is this correct?”**
+
+`demo.dev` is built to answer:
+
+> **“What does this feel like in the product?”**
+
+It is for teams that want a fast, repeatable way to generate:
+
+- PR walkthrough videos
+- feature launch demos
+- authenticated SaaS product tours
+- internal review artifacts
+- clean, editorial product films from real UI states
+
+---
+
+## What demo.dev does
+
+### Diff-aware planning
+- reads changed files and diff context
+- proposes product-facing scenes
+- refines them using live browser probes
+- supports project hints like preferred routes and feature surfaces
+
+### Browser capture
+- uses Playwright to validate and record flows
+- supports authenticated apps through storage state reuse
+- captures screenshots, videos, and interaction events
+- can fall back to manual plans for high-value feature demos
+
+### Video rendering
+- renders with Remotion
+- keeps screen continuity for same-route scenes
+- supports editorial camera motion
+- supports optional narration and background music
+- exports clean mp4 outputs and PR artifacts
+
+### Agent-native usage
+- ships with a standalone CLI
+- ships with a reusable Agent Skill
+- can be installed as a pi package and used by other agents
+
+---
+
+## At a glance
+
+| Layer | What it handles |
+| --- | --- |
+| Planning | Turns diff + hints into a scene plan |
+| Probing | Verifies pages and interactive surfaces in the real app |
+| Capture | Records stable product states with Playwright |
+| Voice | Generates narration and TTS |
+| Music | Adds optional BGM with ducking and fades |
+| Render | Produces the final mp4 with Remotion |
+| Review loop | Uploads artifacts and comments on the PR |
+| Agent support | Exposes a CLI + reusable Agent Skill |
+
+---
+
+## Core ideas
+
+`demo.dev` is not a QA recorder with a nicer theme.
+
+It follows a few principles:
+
+1. **Start from the diff**  
+   Decide what matters from the code change before touching the browser.
+
+2. **Use the real product**  
+   Probe and capture the live app instead of inventing scenes from static assumptions.
+
+3. **Prefer product storytelling over test choreography**  
+   Stable, legible, product-first scenes beat long, noisy interaction replays.
+
+4. **Make the pipeline composable**  
+   Planning, probing, capture, voice, music, rendering, and PR comments can evolve independently.
+
+---
+
+## Installation
+
+```bash
+npm install
+npx playwright install chromium
+```
+
+---
+
+## Quick start
+
+### 1) Bootstrap a repo
+
+```bash
+demo-dev init
+```
+
+This creates:
+
+- `demo.dev.config.json`
 - `.github/workflows/pr-demo.yml`
-  - PR workflow template
-  - artifact upload
-  - PR comment upsert
-- `skills/demo-dev`
-  - an Agent Skill so other agents can learn how to use demo.dev
 
-## Standalone CLI
-
-demo.dev now has a first-class CLI entrypoint, not just `npm run ...` scripts.
-
-Examples:
+### 2) Verify setup
 
 ```bash
-./bin/demo-dev.js config --field baseUrl
-./bin/demo-dev.js doctor
-./bin/demo-dev.js init
-./bin/demo-dev.js pr-demo
-```
-
-Repo-local npm wrapper:
-
-```bash
-npm run demo-dev -- config --field baseUrl
-npm run demo-dev -- doctor
-npm run demo-dev -- pr-demo
-```
-
-When installed as a package, the command name is:
-
-```bash
-demo-dev init
 demo-dev doctor
+```
+
+### 3) Generate a demo
+
+```bash
 demo-dev pr-demo
 ```
 
-## Core commands
+If you do not want a config file yet, you can still run it directly:
 
 ```bash
-demo-dev init
-demo-dev doctor
-demo-dev config
-demo-dev providers
-demo-dev plan
-demo-dev probe
-demo-dev auth:bootstrap
-demo-dev capture
-demo-dev voice
-demo-dev manifest
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-demo-dev comment --output-dir artifacts --pr-number 123
-demo-dev pr-demo
+demo-dev pr-demo --base-url http://localhost:3000 --base-ref origin/main
 ```
 
-Equivalent npm scripts are also available:
+---
 
-```bash
-npm run init
-npm run doctor
-npm run config
-npm run providers
-npm run plan
-npm run probe
-npm run auth:bootstrap
-npm run capture
-npm run voice
-npm run manifest
-npm run render -- --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-npm run comment -- --output-dir artifacts --pr-number 123
-npm run pr-demo
-```
+## Example config
 
-## Agent Skill
-
-This repo ships with an Agent Skill:
-
-- `skills/demo-dev/SKILL.md`
-
-Other users can install this repo as a pi package and let their agent use the skill automatically.
-
-```bash
-pi install /absolute/path/to/demo.dev
-pi install git:github.com/your-org/demo.dev
-```
-
-The repo also includes:
-
-- `demo.dev.config.example.json`
-
-so another repo can copy it and get started quickly.
-
-## Project config
-
-Each target repo can commit its own `demo.dev.config.json`:
+Create a `demo.dev.config.json` in the target repo:
 
 ```json
 {
@@ -156,66 +194,106 @@ Each target repo can commit its own `demo.dev.config.json`:
 }
 ```
 
-Once config exists, many commands no longer need `--base-url` every time.
+A reusable starter file is also included:
 
-Inspect active config:
+- `demo.dev.config.example.json`
 
-```bash
-demo-dev config
-demo-dev config --field baseUrl
-demo-dev config --field preferredRoutes
-```
+---
 
-## Quick start
+## CLI
 
-```bash
-npm install
-npx playwright install chromium
-demo-dev pr-demo
-```
+`demo.dev` has a first-class CLI.
 
-If you do not want a config file yet, you can still pass flags explicitly:
-
-```bash
-demo-dev pr-demo --base-url http://localhost:3000 --base-ref origin/main
-```
-
-## `init` command
-
-Bootstrap a new repo:
+### Main commands
 
 ```bash
 demo-dev init
+demo-dev doctor
+demo-dev config
+demo-dev providers
+demo-dev plan
+demo-dev probe
+demo-dev auth:bootstrap
+demo-dev capture
+demo-dev voice
+demo-dev manifest
+demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
+demo-dev comment --output-dir artifacts --pr-number 123
+demo-dev pr-demo
 ```
 
-This writes:
-
-- `demo.dev.config.json`
-- `.github/workflows/pr-demo.yml`
-
-Use `--force` to overwrite existing files.
-
-## `doctor` command
-
-Check whether the current repo is ready to run demo.dev:
+### Repo-local npm wrappers
 
 ```bash
-demo-dev doctor
+npm run init
+npm run doctor
+npm run config
+npm run providers
+npm run plan
+npm run probe
+npm run auth:bootstrap
+npm run capture
+npm run voice
+npm run manifest
+npm run render -- --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
+npm run comment -- --output-dir artifacts --pr-number 123
+npm run pr-demo
 ```
 
-It checks:
+---
 
-- config presence
-- `baseUrl`, `readyUrl`, `outputDir`, `devCommand`
-- workflow presence
-- `git`, `ffmpeg`, `ffprobe`
-- Playwright Chromium availability
-- storage state presence when configured
-- whether the configured app URL is reachable
+## Typical workflows
+
+### Generate a PR demo
+
+```bash
+demo-dev pr-demo
+```
+
+### Inspect the plan before recording
+
+```bash
+demo-dev plan
+demo-dev probe
+```
+
+### Re-render only
+
+```bash
+demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
+```
+
+### Authenticated product
+
+```bash
+demo-dev auth:bootstrap \
+  --email you@example.com \
+  --password 'your-password'
+
+demo-dev pr-demo
+```
+
+### Add background music
+
+```bash
+DEMO_BGM_PATH=./assets/music/bed.mp3 \
+DEMO_BGM_VOLUME=0.14 \
+DEMO_BGM_DUCKING=0.28 \
+demo-dev pr-demo
+```
+
+This will:
+- loop the music bed across the full video
+- fade it in and out
+- automatically duck it under narration
+
+---
 
 ## Outputs
 
-Default output files:
+By default, `demo.dev` writes to `artifacts/`.
+
+Typical outputs include:
 
 - `artifacts/demo-context.json`
 - `artifacts/demo-plan.initial.json`
@@ -228,75 +306,74 @@ Default output files:
 - `artifacts/cover.png`
 - `artifacts/pr-demo.mp4`
 
-## Run each stage separately
+---
 
-```bash
-demo-dev plan --base-ref origin/main
-demo-dev probe
-demo-dev capture
-demo-dev voice
-demo-dev manifest
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-demo-dev comment --output-dir artifacts --pr-number 123
-```
+## Background music
 
-If the repo has no `demo.dev.config.json`, pass the missing CLI flags explicitly.
+Optional background music is supported through environment variables:
 
-## Environment variables
+- `DEMO_BGM_PATH` — local path to a music file
+- `DEMO_BGM_VOLUME` — base music volume, default `0.16`
+- `DEMO_BGM_DUCKING` — multiplier while narration is active, default `0.3`
+- `DEMO_BGM_FADE_IN_MS` — default `700`
+- `DEMO_BGM_FADE_OUT_MS` — default `1200`
 
-### AI providers
+This is intended for subtle, editorial music beds — not loud trailer-style soundtracks.
 
-- `DEMO_AI_PROVIDER`: `cursor` / `claude` / `codex` / `openai` / `auto`
-- `DEMO_AI_MODEL`
-- `DEMO_AI_MANDATORY`: defaults to `true`; set to `false` to allow heuristic fallback
+---
 
-#### OpenAI-compatible API
+## AI providers
 
-- `OPENAI_API_KEY` or `DEMO_OPENAI_API_KEY`
-- `DEMO_OPENAI_MODEL` (default `gpt-4.1-mini`)
-- `DEMO_OPENAI_BASE_URL` (default `https://api.openai.com/v1`)
+Planning and refinement can use multiple providers.
 
-#### CLI providers
+### Supported today
 
-- `cursor-agent`
+- `cursor`
 - `claude`
 - `codex`
+- `openai`
+- `auto`
 
-Inspect what is available locally:
+Check what is available locally:
 
 ```bash
 demo-dev providers
 ```
 
-### TTS
+### Useful environment variables
 
-- `DEMO_TTS_PROVIDER`: `auto` / `elevenlabs` / `openai` / `local`
+- `DEMO_AI_PROVIDER`
+- `DEMO_AI_MODEL`
+- `DEMO_AI_MANDATORY`
+- `OPENAI_API_KEY` / `DEMO_OPENAI_API_KEY`
+- `DEMO_OPENAI_MODEL`
+- `DEMO_OPENAI_BASE_URL`
 
-#### ElevenLabs
+---
 
-- `ELEVENLABS_API_KEY` or `DEMO_ELEVENLABS_API_KEY`
-- `DEMO_ELEVENLABS_VOICE_ID`
-- `DEMO_ELEVENLABS_MODEL` (default `eleven_multilingual_v2`)
-- `DEMO_ELEVENLABS_BASE_URL` (default `https://api.elevenlabs.io/v1`)
-- `DEMO_ELEVENLABS_OUTPUT_FORMAT` (default `mp3_44100_128`)
-- `DEMO_ELEVENLABS_STABILITY`
-- `DEMO_ELEVENLABS_SIMILARITY_BOOST`
-- `DEMO_ELEVENLABS_STYLE`
-- `DEMO_ELEVENLABS_SPEAKER_BOOST`
+## Voice / TTS
 
-#### OpenAI TTS
+Supported TTS modes:
 
-- `OPENAI_API_KEY` or `DEMO_OPENAI_API_KEY`
-- `DEMO_TTS_MODEL` (default `gpt-4o-mini-tts`)
-- `DEMO_TTS_VOICE` (default `alloy`)
-- `DEMO_OPENAI_BASE_URL` (default `https://api.openai.com/v1`)
+- `elevenlabs`
+- `openai`
+- `local`
+- `auto`
 
-#### Local macOS fallback
+Useful variables:
 
-- `DEMO_LOCAL_TTS_VOICE` (default `Samantha`)
-- `DEMO_LOCAL_TTS_RATE` (default `185`)
+- `DEMO_TTS_PROVIDER`
+- `DEMO_TTS_MODEL`
+- `DEMO_TTS_VOICE`
+- `DEMO_LOCAL_TTS_VOICE`
+- `DEMO_LOCAL_TTS_RATE`
+- `DEMO_ELEVENLABS_*`
 
-### Session / auth
+---
+
+## Auth and storage state
+
+Useful variables:
 
 - `DEMO_STORAGE_STATE`
 - `DEMO_SAVE_STORAGE_STATE`
@@ -304,15 +381,7 @@ demo-dev providers
 - `DEMO_LOGIN_PASSWORD`
 - `DEMO_CONFIG`
 
-### GitHub comment
-
-- `GITHUB_TOKEN`
-- `GITHUB_REPOSITORY`
-- `GITHUB_EVENT_PATH` or `--pr-number`
-
-## Auth bootstrap
-
-If your product requires login, generate a storage state first:
+If your product is behind login, generate a storage state first:
 
 ```bash
 demo-dev auth:bootstrap \
@@ -321,7 +390,7 @@ demo-dev auth:bootstrap \
   --storage-state artifacts/storage-state.json
 ```
 
-Then run the pipeline with that authenticated state:
+Then reuse it:
 
 ```bash
 DEMO_STORAGE_STATE=artifacts/storage-state.json \
@@ -329,43 +398,79 @@ DEMO_SAVE_STORAGE_STATE=artifacts/storage-state.json \
 demo-dev pr-demo
 ```
 
-## PR comments
+---
 
-The comment step writes back:
+## GitHub workflow
+
+A reusable workflow template is included:
+
+- `.github/workflows/pr-demo.yml`
+
+It supports this config order:
+
+1. GitHub Variables
+   - `DEMO_BASE_URL`
+   - `DEMO_READY_URL`
+   - `DEMO_DEV_COMMAND`
+   - `DEMO_OUTPUT_DIR`
+2. fallback to repo-local `demo.dev.config.json`
+
+The PR comment step can post:
 
 - workflow run link
 - scene summary
 - output file summary
 - artifact download hint
 
-## How other repos should use this
+---
 
-Recommended setup for every target repo:
+## Agent Skill
 
-1. Commit a repo-specific `demo.dev.config.json`
-2. Reuse `.github/workflows/pr-demo.yml`
-3. Generate storage state with `auth:bootstrap` when auth is required
+This repo includes a reusable Agent Skill:
 
-The workflow supports this priority order:
+- `skills/demo-dev/SKILL.md`
 
-1. GitHub Variables: `DEMO_BASE_URL`, `DEMO_READY_URL`, `DEMO_DEV_COMMAND`, `DEMO_OUTPUT_DIR`
-2. fallback to `demo.dev.config.json`
+That means other users can install this repo and let their agent learn how to use `demo.dev`.
 
-So the intended positioning is:
+```bash
+pi install /absolute/path/to/demo.dev
+pi install git:github.com/your-org/demo.dev
+```
 
-> **a PR demo engine that every repo can configure for itself**
+The skill includes setup guidance, workflow recipes, and project configuration references.
+
+---
+
+## Publishing notes
+
+The repo is set up to stay clean when shared:
+
+- artifacts are ignored
+- local config is ignored
+- only `demo.dev.config.example.json` is intended for publication
+- npm packaging is restricted through `package.json#files`
+
+---
 
 ## Current limitations
 
-1. AI providers mainly power planning and refinement; TTS still uses a separate provider stack.
-2. The planner is not yet fully repo-aware beyond diff signals and project hints.
-3. Probe exploration still follows only one likely next step, not a full state machine.
-4. Voice generation does not yet support scene-level emotional direction or full casting.
-5. The renderer is moving toward product-film quality, but it is not yet a full timeline editor.
+- AI planning is strong, but not yet fully repo-aware beyond diff signals and project hints.
+- Probe exploration still follows a small set of likely actions, not a full app state machine.
+- The renderer is moving toward a true product-film mode, but is not yet a full timeline editor.
+- Agent provider support exists, but is not yet as complete as tools like `expect`.
 
-## Near-term roadmap
+---
 
-1. Better project hints and route graphs
-2. More robust state-based product film mode
-3. Better init flows and repo onboarding
-4. More polished standalone CLI ergonomics
+## Roadmap
+
+- richer repo-aware planning
+- stronger state-based product film mode
+- better agent/provider ergonomics
+- more polished onboarding and publishing flows
+- more robust multi-project recipes
+
+---
+
+## In one sentence
+
+**demo.dev helps teams turn code changes into something people can actually watch.**

@@ -53,6 +53,11 @@ type VisualPlan = {
   endPose: CameraPose;
 };
 
+type NarrationWindow = {
+  start: number;
+  end: number;
+};
+
 type EventRegion = {
   event: CaptureEvent;
   region: FocusRegion;
@@ -511,6 +516,39 @@ const OutroCard: React.FC = () => {
   );
 };
 
+const BackgroundMusic: React.FC<{
+  bgm: NonNullable<RenderManifest["bgm"]>;
+  narrationWindows: NarrationWindow[];
+  totalDurationInFrames: number;
+}> = ({ bgm, narrationWindows, totalDurationInFrames }) => {
+  const resolvedBgmSrc = bgm.assetPath ? staticFile(bgm.assetPath) : bgm.src;
+  if (!resolvedBgmSrc) return null;
+
+  const baseVolume = clamp(bgm.volume ?? 0.16, 0, 1);
+  const ducking = clamp(bgm.ducking ?? 0.3, 0, 1);
+  const fadeInFrames = Math.max(0, bgm.fadeInFrames ?? 20);
+  const fadeOutFrames = Math.max(0, bgm.fadeOutFrames ?? 36);
+
+  return (
+    <Audio
+      src={resolvedBgmSrc}
+      loop
+      loopVolumeCurveBehavior="extend"
+      volume={(audioFrame: number) => {
+        const inNarration = narrationWindows.some((window) => audioFrame >= window.start && audioFrame < window.end);
+        const introFade = fadeInFrames > 0 ? interpolate(audioFrame, [0, fadeInFrames], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) : 1;
+        const outroFade = fadeOutFrames > 0
+          ? interpolate(audioFrame, [Math.max(0, totalDurationInFrames - fadeOutFrames), totalDurationInFrames], [1, 0], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            })
+          : 1;
+        return baseVolume * introFade * outroFade * (inNarration ? ducking : 1);
+      }}
+    />
+  );
+};
+
 const SceneVisual: React.FC<
   ManifestScene & {
     audioDelayFrames: number;
@@ -663,14 +701,23 @@ const buildTimeline = (scenes: RenderManifest["scenes"]) => {
   });
 };
 
-export const DemoVideo: React.FC<RenderManifest> = ({ scenes }) => {
+export const DemoVideo: React.FC<RenderManifest> = ({ scenes, bgm }) => {
   const timeline = React.useMemo(() => buildTimeline(scenes), [scenes]);
   const visualPlans = React.useMemo(() => buildVisualPlans(scenes), [scenes]);
+  const totalDurationInFrames = timeline.length > 0
+    ? timeline[timeline.length - 1].audioStart + timeline[timeline.length - 1].scene.durationInFrames + OUTRO_FRAMES
+    : INTRO_FRAMES + OUTRO_FRAMES;
+  const narrationWindows = React.useMemo(
+    () => timeline.map(({ scene, audioStart }) => ({ start: audioStart, end: audioStart + scene.durationInFrames })),
+    [timeline],
+  );
 
   return (
     <AbsoluteFill>
       <Background />
       <StageShell />
+
+      {bgm ? <BackgroundMusic bgm={bgm} narrationWindows={narrationWindows} totalDurationInFrames={totalDurationInFrames} /> : null}
 
       {timeline.map(({ scene, visualStart, visualDuration, audioDelayFrames }, index) => (
         <Sequence key={`${scene.id}-visual`} from={visualStart} durationInFrames={visualDuration} layout="none">

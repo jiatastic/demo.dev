@@ -33,6 +33,16 @@ const CaptureEventSchema = z.object({
   height: z.number().optional(),
 });
 
+const RenderBgmSchema = z.object({
+  path: z.string().optional(),
+  src: z.string().optional(),
+  assetPath: z.string().optional(),
+  volume: z.number().optional(),
+  ducking: z.number().optional(),
+  fadeInFrames: z.number().optional(),
+  fadeOutFrames: z.number().optional(),
+});
+
 export const RenderSceneSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -68,6 +78,7 @@ export const RenderManifestSchema = z.object({
   width: z.number(),
   height: z.number(),
   scenes: z.array(RenderSceneSchema),
+  bgm: RenderBgmSchema.optional(),
 });
 
 export type RenderManifestProps = z.infer<typeof RenderManifestSchema>;
@@ -104,6 +115,7 @@ export const RemotionRoot: React.FC = () => {
         width: 1600,
         height: 900,
         scenes: [],
+        bgm: undefined,
       }}
       calculateMetadata={calculateMetadata}
     />

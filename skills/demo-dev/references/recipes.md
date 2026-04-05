@@ -34,6 +34,17 @@ Use this when the feature is not obvious from the diff.
 demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
 ```
 
+## Recipe: add background music
+
+```bash
+DEMO_BGM_PATH=./assets/music/bed.mp3 \
+DEMO_BGM_VOLUME=0.14 \
+DEMO_BGM_DUCKING=0.28 \
+demo-dev pr-demo
+```
+
+This will loop the music bed across the full video, fade it in and out, and lower it automatically while narration is playing.
+
 ## Recipe: manual feature film
 
 Use a manual plan when you need a specific flow like:
