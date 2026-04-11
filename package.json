@@ -1,6 +1,6 @@
 {
   "name": "demo-dev",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.2-alpha.0",
   "description": "Generate polished product demo videos with one command. Just give a URL and a prompt.",
   "type": "module",
   "main": "./dist/index.js",

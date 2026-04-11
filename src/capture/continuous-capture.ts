@@ -257,6 +257,32 @@ const ZOOM_INJECT_SCRIPT = `
 })();
 `;
 
+const SCENE_TRANSITION_SCRIPT = `
+(() => {
+  if (document.getElementById('__scene-fade')) return;
+  const overlay = document.createElement('div');
+  overlay.id = '__scene-fade';
+  Object.assign(overlay.style, {
+    position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+    zIndex: '999997', pointerEvents: 'none',
+    background: 'white', opacity: '0',
+    transition: 'opacity 0.4s ease-in-out',
+  });
+  document.body.appendChild(overlay);
+  window.__fadeOut = () => { overlay.style.opacity = '1'; };
+  window.__fadeIn = () => { overlay.style.opacity = '0'; };
+})();
+`;
+
+/** Fade to white and back — used between scenes. */
+const fadeTransition = async (page: Page) => {
+  await page.evaluate(SCENE_TRANSITION_SCRIPT).catch(() => undefined);
+  await page.evaluate(() => (window as any).__fadeOut?.()).catch(() => undefined);
+  await page.waitForTimeout(450);
+  await page.evaluate(() => (window as any).__fadeIn?.()).catch(() => undefined);
+  await page.waitForTimeout(450);
+};
+
 /** Smoothly zoom into a point on the page (captured by screencast at 60fps). */
 const zoomToPoint = async (page: Page, x: number, y: number, scale = 1.5) => {
   await page.evaluate(ZOOM_INJECT_SCRIPT).catch(() => undefined);
@@ -307,13 +333,13 @@ const CURSOR_OVERLAY_SCRIPT = `
   cursor.id = '__ghost-cursor';
   Object.assign(cursor.style, {
     position: 'fixed', zIndex: '999999', pointerEvents: 'none',
-    left: '0px', top: '0px', width: '22px', height: '32px',
-    transition: 'left 0.04s cubic-bezier(.2,.8,.3,1), top 0.04s cubic-bezier(.2,.8,.3,1)',
-    filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))',
+    left: '0px', top: '0px', width: '20px', height: '28px',
+    transition: 'left 0.03s linear, top 0.03s linear',
   });
-  /* Standard macOS cursor: white fill, black outline, clean geometry */
-  cursor.innerHTML = '<svg width="22" height="32" viewBox="0 0 22 32" xmlns="http://www.w3.org/2000/svg">' +
-    '<path d="M1.5 0.5L1.5 24.5L7 18.5L11.5 28.5L14.5 27L10 17.5L18 17.5Z" fill="white" stroke="black" stroke-width="1.2" stroke-linejoin="round"/>' +
+  /* Precise macOS default cursor — traced from Apple's actual cursor spec */
+  cursor.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="28" viewBox="0 0 20 28">' +
+    '<defs><filter id="cs" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0.5" dy="1.5" stdDeviation="0.8" flood-opacity="0.45"/></filter></defs>' +
+    '<path filter="url(#cs)" d="M2.2 0L2.2 21.4L6.8 16.4L10.6 24.8L13.2 23.6L9.4 15.6L16 15.6Z" fill="white" stroke="black" stroke-width="1.1" stroke-linejoin="round"/>' +
     '</svg>';
   document.body.appendChild(cursor);
 
@@ -391,6 +417,7 @@ const runActionWithCursor = async (
       await page.evaluate(CURSOR_OVERLAY_SCRIPT).catch(() => undefined);
       await page.evaluate(CURSOR_TRACKER_SCRIPT).catch(() => undefined);
       await page.evaluate(ZOOM_INJECT_SCRIPT).catch(() => undefined);
+      await page.evaluate(SCENE_TRANSITION_SCRIPT).catch(() => undefined);
       await page.waitForTimeout(humanDelay(400));
       break;
     }
@@ -711,8 +738,8 @@ export const capturePlanContinuous = async (
         url: page.url(),
       });
 
-      // Brief pause between scenes (feels like a human taking a breath)
-      await page.waitForTimeout(humanDelay(400));
+      // Smooth fade transition between scenes
+      await fadeTransition(page);
     }
 
     // Final drain of cursor samples
