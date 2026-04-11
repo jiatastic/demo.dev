@@ -1,244 +1,174 @@
 <div align="center">
 
-# demo.dev
+# demo-dev
 
-### Turn pull requests into polished product demos
+### Generate polished product demo videos with one command.
 
-`demo.dev` reads a PR, decides what matters, captures the real product in the browser, and renders a clean video.
+Give a URL and a prompt. Get a narrated, Screen Studio-style video.
 
-**PR opened → read diff → plan scenes → probe pages → capture product states → add voice / music → render mp4**
+```bash
+npx demo-dev demo --base-url https://your-app.com --prompt "Show the dashboard and create a new project" --frame
+```
 
 </div>
 
 ---
 
-## What it is
+## What it does
 
-`demo.dev` is a diff-aware demo generator for web apps.
+`demo-dev` opens your web app in a headless browser, navigates it like a human, records everything, adds AI narration, and renders a polished mp4.
 
-It is built for teams that want to create:
-
-- PR walkthrough videos
-- feature launch demos
-- authenticated SaaS product tours
-- internal review artifacts
-
-It is designed to feel closer to **product storytelling** than to **QA replay**.
+- AI plans the demo from a natural language prompt
+- Ghost-cursor moves the mouse with human-like Bezier curves
+- Playwright screencast records continuously at 60fps
+- CSS zoom animates smoothly into click targets (Screen Studio style)
+- ElevenLabs / OpenAI / local TTS generates narration per scene
+- FFmpeg composes the final video with speed ramps, browser frame, and audio
 
 ---
 
 ## Quick start
 
 ```bash
-npm install
+npm install -g demo-dev
 npx playwright install chromium
-```
-
-Bootstrap a repo:
-
-```bash
-demo-dev init
-```
-
-Verify setup:
-
-```bash
-demo-dev doctor
 ```
 
 Generate a demo:
 
 ```bash
-demo-dev pr-demo
+demo-dev demo \
+  --base-url https://your-app.com \
+  --prompt "Show the onboarding flow and invite a teammate" \
+  --frame
 ```
 
-If you do not want a config file yet:
+### Authenticated apps
 
 ```bash
-demo-dev pr-demo --base-url http://localhost:3000 --base-ref origin/main
+demo-dev auth --base-url https://your-app.com --email you@example.com --password 'your-password'
+demo-dev demo --base-url https://your-app.com --prompt "..." --frame
 ```
 
 ---
 
-## Example config
+## Commands
 
-Create a `demo.dev.config.json` in the target repo:
+```bash
+demo-dev demo        # Full pipeline: prompt -> capture -> voice -> render
+demo-dev auth        # Login and save browser session
+demo-dev capture     # Record only (no voice/render)
+demo-dev voice       # Generate TTS narration only
+demo-dev render      # Capture + voice + compose video
+demo-dev plan        # Generate demo plan from git diff
+demo-dev probe       # Plan + probe pages for element discovery
+demo-dev init        # Create config file in your project
+demo-dev doctor      # Check environment (ffmpeg, playwright, etc.)
+demo-dev config      # Show resolved config
+demo-dev providers   # List available AI/TTS providers
+demo-dev comment     # Post demo as a PR comment
+```
+
+Run `demo-dev <command> --help` for detailed options.
+
+---
+
+## Key flags
+
+| Flag | Description |
+|------|-------------|
+| `--prompt "..."` | Natural language description of the demo to create |
+| `--frame` | Wrap video in a browser window with gradient background |
+| `--quality draft\|standard\|high` | Video quality preset |
+| `--base-url` | URL of the app to demo |
+| `--base-ref` | Git base ref for diff-based planning (default: origin/main) |
+| `--output-dir` | Where to write artifacts (default: artifacts) |
+
+---
+
+## AI & voice providers
+
+Set via environment variables:
+
+```bash
+# AI planning (pick one)
+DEMO_AI_PROVIDER=claude          # Uses local Claude CLI
+DEMO_AI_PROVIDER=openai          # Uses OpenAI API
+DEMO_OPENAI_API_KEY=sk-...
+
+# Voice narration (pick one)
+DEMO_TTS_PROVIDER=elevenlabs     # Best quality
+DEMO_ELEVENLABS_API_KEY=sk_...
+DEMO_ELEVENLABS_VOICE_ID=...
+
+DEMO_TTS_PROVIDER=openai         # Good quality
+DEMO_OPENAI_API_KEY=sk-...
+
+DEMO_TTS_PROVIDER=local          # Free, uses macOS `say` command
+```
+
+---
+
+## Config file
+
+Create a `demo.dev.config.json` in your project:
 
 ```json
 {
   "projectName": "My App",
   "baseUrl": "http://localhost:3000",
-  "readyUrl": "http://localhost:3000",
-  "devCommand": "npm run dev",
   "baseRef": "origin/main",
   "outputDir": "artifacts",
-  "storageStatePath": "artifacts/storage-state.json",
-  "saveStorageStatePath": "artifacts/storage-state.json",
   "preferredRoutes": ["/", "/dashboard"],
-  "featureHints": ["home", "dashboard"],
-  "authRequiredRoutes": ["/dashboard"]
+  "featureHints": ["dashboard", "settings"],
+  "auth": {
+    "loginPath": "/login",
+    "emailTarget": { "strategy": "css", "value": "#email" },
+    "passwordTarget": { "strategy": "css", "value": "#password" },
+    "submitTarget": { "strategy": "role", "role": "button", "name": "Login" }
+  }
 }
 ```
 
-A reusable starter file is included:
-
-- `demo.dev.config.example.json`
-
 ---
 
-## Core CLI
+## How it works
 
-```bash
-demo-dev init
-demo-dev doctor
-demo-dev config
-demo-dev providers
-demo-dev plan
-demo-dev probe
-demo-dev auth:bootstrap
-demo-dev capture
-demo-dev voice
-demo-dev manifest
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-demo-dev comment --output-dir artifacts --pr-number 123
-demo-dev pr-demo
 ```
-
-Repo-local npm wrappers are also available:
-
-```bash
-npm run init
-npm run doctor
-npm run config
-npm run providers
-npm run plan
-npm run probe
-npm run auth:bootstrap
-npm run capture
-npm run voice
-npm run manifest
-npm run render -- --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-npm run comment -- --output-dir artifacts --pr-number 123
-npm run pr-demo
+prompt + URL
+     |
+     v
+Playwright explores the site (screenshots + interactive elements)
+     |
+     v
+AI generates a demo plan (scenes, actions, narration text)
+     |
+     v
+ghost-cursor executes actions with human-like mouse movement
+     |
+     v
+page.screencast records continuous video + CSS zoom on interactions
+     |
+     v
+ElevenLabs/OpenAI generates narration audio per scene
+     |
+     v
+FFmpeg composes: speed ramps + browser frame + audio sync
+     |
+     v
+polished mp4
 ```
 
 ---
 
-## Typical workflows
+## Requirements
 
-### Authenticated product
-
-```bash
-demo-dev auth:bootstrap \
-  --email you@example.com \
-  --password 'your-password'
-
-demo-dev pr-demo
-```
-
-### Re-render only
-
-```bash
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-```
-
-### Add background music
-
-```bash
-DEMO_BGM_PATH=./assets/music/bed.mp3 \
-DEMO_BGM_VOLUME=0.14 \
-DEMO_BGM_DUCKING=0.28 \
-demo-dev pr-demo
-```
-
-### Use AI providers and TTS
-
-`demo.dev` now uses only `DEMO_*` provider keys for its own AI and TTS integrations.
-There is no fallback to generic provider env vars.
-
-```bash
-DEMO_OPENAI_API_KEY=your_openai_key
-DEMO_AI_PROVIDER=openai
-DEMO_TTS_PROVIDER=openai
-
-demo-dev pr-demo
-```
-
-Useful env vars:
-
-- `DEMO_OPENAI_API_KEY`
-- `DEMO_OPENAI_BASE_URL` (optional, defaults to `https://api.openai.com/v1`)
-- `DEMO_OPENAI_MODEL` (planner / AI requests)
-- `DEMO_TTS_PROVIDER` (`auto`, `openai`, `elevenlabs`, `local`)
-- `DEMO_TTS_MODEL` (optional OpenAI TTS model)
-- `DEMO_TTS_VOICE` (optional OpenAI TTS voice)
-- `DEMO_ELEVENLABS_API_KEY`
-- `DEMO_ELEVENLABS_VOICE_ID`
-
-If no cloud TTS provider is configured, `demo.dev` falls back to local speech synthesis tools when available.
+- Node.js >= 20
+- FFmpeg (install via `brew install ffmpeg` or equivalent)
+- Chromium (installed via `npx playwright install chromium`)
 
 ---
 
-## Outputs
+## License
 
-By default, outputs go to `artifacts/`.
-
-Typical files:
-
-- `artifacts/demo-context.json`
-- `artifacts/demo-plan.initial.json`
-- `artifacts/page-probes.json`
-- `artifacts/demo-plan.json`
-- `artifacts/captures/`
-- `artifacts/voice-script.json`
-- `artifacts/render-manifest.json`
-- `artifacts/cover.png`
-- `artifacts/pr-demo.mp4`
-
----
-
-## Agent Skill
-
-This repo includes a reusable Agent Skill:
-
-- `skills/demo-dev/SKILL.md`
-
-Other users can install this repo and let their agent use `demo.dev` directly:
-
-```bash
-pi install /absolute/path/to/demo.dev
-pi install git:github.com/your-org/demo.dev
-```
-
----
-
-## What is implemented
-
-- diff-aware planning
-- browser probing and capture with Playwright
-- session/auth storage state reuse
-- Remotion rendering
-- optional narration and background music
-- PR comment integration
-- multi-project config support
-- standalone CLI + Agent Skill
-
----
-
-## Notes
-
-- AI providers currently support `cursor`, `claude`, `codex`, `openai`, and `auto`.
-- Provider keys are intentionally namespaced to `DEMO_*` env vars for explicit, project-local configuration.
-- Local config is intentionally not committed.
-- Publishable config lives in `demo.dev.config.example.json`.
-- Before publishing, you can verify package contents with:
-
-```bash
-npm pack --dry-run --json
-```
-
----
-
-## In one sentence
-
-**demo.dev helps teams turn code changes into something people can actually watch.**
+MIT
