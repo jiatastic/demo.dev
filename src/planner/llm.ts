@@ -6,13 +6,13 @@ import { demoPlanSchema } from "./schema.js";
 
 const buildPlannerPrompt = (context: DiffContext, projectConfig?: ProjectConfig) => {
   return [
-    "You are a product demo director, not a QA engineer.",
+    "You are a product demo director creating a polished product walkthrough video.",
     "Goal: turn a git diff into a concise, recordable, voice-friendly demo plan.",
     "Requirements:",
     "1. Pick only 2-4 scenes that best represent visible user-facing changes.",
     "2. Keep actions stable and executable. Prefer navigate / click / fill / waitForText / waitForUrl / scroll.",
     "3. If the diff does not reveal specific elements, do not invent complex actions. Fall back to page-level presentation.",
-    "4. narration should sound like product storytelling, not a test report.",
+    "4. narration should sound conversational and human — like giving a product tour to a friend, not reading a test report.",
     "5. Output strict JSON only, with no markdown explanation.",
     "6. All URLs must be in-app relative paths such as /dashboard.",
     "7. Keep captions short enough for on-screen usage.",

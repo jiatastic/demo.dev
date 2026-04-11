@@ -1,83 +1,100 @@
-# demo.dev skill recipes
+# demo-dev recipes
 
-## Recipe: run on a simple local app
+## Recipe: prompt-driven demo (recommended)
 
 ```bash
-npm install
-npx playwright install chromium
-demo-dev doctor
-demo-dev pr-demo
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "Show the onboarding flow, create a workspace, invite a teammate" \
+  --frame
+```
+
+## Recipe: prompt-driven with premium voice
+
+```bash
+DEMO_ELEVENLABS_API_KEY=sk_... \
+DEMO_ELEVENLABS_VOICE_ID=... \
+DEMO_TTS_PROVIDER=elevenlabs \
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "Show the dashboard and settings page" \
+  --frame
 ```
 
 ## Recipe: authenticated SaaS
 
 ```bash
-demo-dev auth:bootstrap \
+demo-dev auth \
+  --base-url https://app.example.com \
   --email you@example.com \
   --password 'your-password'
 
-demo-dev pr-demo
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "Show the inbox and open a conversation" \
+  --frame
+```
+
+## Recipe: diff-driven PR demo
+
+```bash
+demo-dev demo --base-url http://localhost:3000
+```
+
+No `--prompt` means it reads the git diff and auto-plans scenes.
+
+## Recipe: high quality render
+
+```bash
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "..." \
+  --frame \
+  --quality high
+```
+
+## Recipe: fast draft for iteration
+
+```bash
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "..." \
+  --quality draft
+```
+
+## Recipe: with background music
+
+```bash
+DEMO_BGM_PATH=./assets/music/bed.mp3 \
+DEMO_BGM_VOLUME=0.14 \
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "..." \
+  --frame
 ```
 
 ## Recipe: OpenAI for planning and TTS
 
 ```bash
-DEMO_OPENAI_API_KEY=your_openai_key \
+DEMO_OPENAI_API_KEY=sk-... \
 DEMO_AI_PROVIDER=openai \
 DEMO_TTS_PROVIDER=openai \
-demo-dev pr-demo
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "..." \
+  --frame
 ```
 
-This repo only reads `DEMO_*` provider keys for AI and TTS credentials.
-
-## Recipe: inspect plan quality first
+## Recipe: inspect plan before recording
 
 ```bash
 demo-dev plan
-demo-dev probe
+cat artifacts/demo-plan.json
 ```
 
-Use this when the feature is not obvious from the diff.
-
-## Recipe: re-render without recapturing
+## Recipe: PR automation in CI
 
 ```bash
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-```
-
-## Recipe: add background music
-
-```bash
-DEMO_BGM_PATH=./assets/music/bed.mp3 \
-DEMO_BGM_VOLUME=0.14 \
-DEMO_BGM_DUCKING=0.28 \
-demo-dev pr-demo
-```
-
-This will loop the music bed across the full video, fade it in and out, and lower it automatically while narration is playing.
-
-## Recipe: manual feature film
-
-Use a manual plan when you need a specific flow like:
-- AI editing
-- inbox triage
-- onboarding
-- dashboard walkthrough
-
-Suggested flow:
-
-1. Create `artifacts/manual-plan.json`
-2. Run capture against that plan
-3. Build manifest
-4. Render mp4
-
-## Recipe: PR automation
-
-In CI, run:
-
-```bash
-demo-dev pr-demo
+demo-dev demo --base-url http://localhost:3000
 demo-dev comment --output-dir artifacts
 ```
-
-If the app needs a server, set `devCommand` and `readyUrl` in config or GitHub Variables.

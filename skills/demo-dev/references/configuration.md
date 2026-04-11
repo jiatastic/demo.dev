@@ -1,45 +1,19 @@
-# demo.dev skill configuration
+# demo-dev configuration
 
-## Quick bootstrap
+## Config file (optional)
 
-A fast way to bootstrap a repo is:
+Config is **optional for prompt-driven mode**. Just pass `--base-url` and `--prompt` directly.
 
-```bash
-demo-dev init
-```
-
-That writes a starter config plus the workflow template.
-
-## Minimal config
-
-Create `demo.dev.config.json` in the target repo:
+For project-level defaults, create `demo.dev.config.json`:
 
 ```json
 {
   "projectName": "My App",
-  "baseUrl": "http://localhost:3000",
-  "readyUrl": "http://localhost:3000",
-  "devCommand": "npm run dev",
-  "baseRef": "origin/main",
-  "outputDir": "artifacts",
-  "preferredRoutes": ["/", "/dashboard"],
-  "featureHints": ["home", "dashboard"]
-}
-```
-
-## Auth-enabled config
-
-```json
-{
-  "projectName": "My SaaS",
   "baseUrl": "https://app.example.com",
-  "readyUrl": "https://app.example.com",
   "baseRef": "origin/main",
   "outputDir": "artifacts",
-  "storageStatePath": "artifacts/storage-state.json",
-  "saveStorageStatePath": "artifacts/storage-state.json",
-  "preferredRoutes": ["/dashboard", "/settings"],
-  "featureHints": ["dashboard", "settings"],
+  "preferredRoutes": ["/", "/dashboard", "/settings"],
+  "featureHints": ["dashboard", "onboarding", "settings"],
   "authRequiredRoutes": ["/dashboard", "/settings"],
   "auth": {
     "loginPath": "/login",
@@ -51,52 +25,70 @@ Create `demo.dev.config.json` in the target repo:
 }
 ```
 
-## Useful overrides
+Or bootstrap with `demo-dev init`.
 
-You can override config through:
+## Config fields
 
-- CLI flags like `--base-url`, `--output-dir`, `--base-ref`
-- env vars like `DEMO_STORAGE_STATE`, `DEMO_SAVE_STORAGE_STATE`, `DEMO_CONFIG`
-- GitHub Variables in workflow:
-  - `DEMO_BASE_URL`
-  - `DEMO_READY_URL`
-  - `DEMO_DEV_COMMAND`
-  - `DEMO_OUTPUT_DIR`
+| Field | Description |
+|-------|-------------|
+| `projectName` | Display name for the project |
+| `baseUrl` | Default URL of the web app |
+| `baseRef` | Git base ref for diff-based planning (default: origin/main) |
+| `outputDir` | Where to write artifacts (default: artifacts) |
+| `preferredRoutes` | Routes the AI planner should explore and prioritize |
+| `featureHints` | Feature names to help the AI planner |
+| `authRequiredRoutes` | Routes that need login |
+| `auth.*` | Login flow configuration |
 
-## AI and TTS environment variables
+## Environment variables
 
-`demo.dev` uses explicit `DEMO_*` env vars for provider credentials.
-It does not fall back to generic provider keys such as `OPENAI_API_KEY` or `ELEVENLABS_API_KEY`.
-
-Common values:
-
-- `DEMO_OPENAI_API_KEY`
-- `DEMO_OPENAI_BASE_URL`
-- `DEMO_OPENAI_MODEL`
-- `DEMO_AI_PROVIDER`
-- `DEMO_AI_MODEL`
-- `DEMO_TTS_PROVIDER`
-- `DEMO_TTS_MODEL`
-- `DEMO_TTS_VOICE`
-- `DEMO_ELEVENLABS_API_KEY`
-- `DEMO_ELEVENLABS_VOICE_ID`
-
-Example:
+### AI providers
 
 ```bash
-DEMO_OPENAI_API_KEY=your_openai_key
-DEMO_AI_PROVIDER=openai
-DEMO_TTS_PROVIDER=openai
+DEMO_AI_PROVIDER=auto           # auto, claude, cursor, codex, openai
+DEMO_OPENAI_API_KEY=sk-...      # Required for openai provider
+DEMO_OPENAI_BASE_URL=...        # Optional
+DEMO_OPENAI_MODEL=...           # Optional model override
 ```
 
-## Suggested setup for other repos
+### TTS providers
 
-1. Copy `demo.dev.config.example.json` into the target repo.
-2. Adjust `baseUrl`, `devCommand`, and `auth`.
-3. Validate the repo:
+```bash
+DEMO_TTS_PROVIDER=auto          # auto, elevenlabs, openai, local
+
+# ElevenLabs (best quality)
+DEMO_ELEVENLABS_API_KEY=sk_...
+DEMO_ELEVENLABS_VOICE_ID=...
+
+# OpenAI TTS
+DEMO_OPENAI_API_KEY=sk-...
+
+# Local (macOS only, free)
+DEMO_LOCAL_TTS_VOICE=Samantha
+```
+
+### Auth
+
+```bash
+DEMO_STORAGE_STATE=path/to/storage-state.json
+DEMO_LOGIN_EMAIL=you@example.com
+DEMO_LOGIN_PASSWORD=your-password
+```
+
+### Background music
+
+```bash
+DEMO_BGM_PATH=./assets/music/bed.mp3
+DEMO_BGM_VOLUME=0.16
+```
+
+## Precedence
+
+CLI flags > Environment variables > Config file > Defaults
+
+## Verify setup
 
 ```bash
 demo-dev doctor
 demo-dev config
-demo-dev pr-demo
 ```

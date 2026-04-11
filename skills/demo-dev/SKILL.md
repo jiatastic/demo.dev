@@ -1,153 +1,109 @@
 ---
 name: demo-dev
-description: Generate PR demo videos for any web app repo using demo.dev. Use when a user wants an agent to turn a PR, diff, feature branch, or live app flow into a product demo video, especially for authenticated SaaS flows, launch-style walkthroughs, or PR review artifacts.
+description: Generate product demo videos for any web app. Give a URL and a prompt, get a narrated Screen Studio-style video. Supports authenticated SaaS, prompt-driven or diff-driven planning, and AI narration.
 allowed-tools: Bash Read Edit Write
 ---
 
 # demo-dev
 
-Use this skill when the user wants an agent to create or update a demo video with the `demo.dev` pipeline.
+Use this skill when the user wants to generate a demo video of a web app.
 
 ## What this skill does
 
-- Reads project config from `demo.dev.config.json`
-- Runs the pipeline from diff -> plan -> probe -> capture -> render
-- Supports authenticated products via storage state
-- Can also create manual plans for feature-specific demos
-- Produces artifacts like mp4, manifest, captures, and PR comments
+- Opens a web app in a headless browser
+- AI plans the demo from a natural language prompt (or git diff)
+- Ghost-cursor navigates with human-like mouse movement
+- Records continuously with Playwright screencast + CSS zoom
+- Generates narration per scene with ElevenLabs / OpenAI / local TTS
+- Composes a polished mp4 with FFmpeg (speed ramps, browser frame, audio)
 
-## Default workflow
+## Quick start
 
-### 1. Inspect config
+### 1. Check environment
 
 ```bash
-demo-dev config
-demo-dev config --field baseUrl
 demo-dev doctor
 ```
 
-If config is missing, run `demo-dev init` or create one from [`../../demo.dev.config.example.json`](../../demo.dev.config.example.json).
+Requires: Node.js >= 20, FFmpeg, Chromium (`npx playwright install chromium`).
 
-See [references/configuration.md](references/configuration.md).
-
-### 2. If auth is required, bootstrap login
+### 2. If auth is required
 
 ```bash
-demo-dev auth:bootstrap \
+demo-dev auth \
+  --base-url https://app.example.com \
   --email you@example.com \
   --password 'your-password'
 ```
 
-This writes storage state using the configured path or `artifacts/storage-state.json`.
-
-### 3. Run the full pipeline
+### 3. Generate a demo
 
 ```bash
-demo-dev pr-demo
+demo-dev demo \
+  --base-url https://app.example.com \
+  --prompt "Show the dashboard, create a new project, invite a teammate" \
+  --frame
 ```
 
-Or explicitly:
+This single command will: explore the site → AI plan scenes → record → narrate → compose → mp4.
+
+### Diff-driven mode (from a PR branch)
 
 ```bash
-demo-dev pr-demo --base-url http://localhost:3000 --base-ref origin/main
+demo-dev demo --base-url http://localhost:3000
 ```
 
-### 4. Re-render only when capture and manifest already exist
+No `--prompt` = auto-detect changes from git diff.
+
+## Key flags
+
+| Flag | Description |
+|------|-------------|
+| `--prompt "..."` | Describe the demo in natural language |
+| `--frame` | Add Screen Studio-style browser frame with gradient background |
+| `--quality draft\|standard\|high` | Video quality preset |
+| `--base-url` | URL of the app |
+| `--output-dir` | Where to write output (default: artifacts) |
+
+## All commands
 
 ```bash
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
+demo-dev demo        # Full pipeline
+demo-dev auth        # Login and save session
+demo-dev capture     # Record only
+demo-dev voice       # Generate narration only
+demo-dev render      # Record + narrate + compose
+demo-dev plan        # Generate plan from git diff
+demo-dev probe       # Plan + probe pages
+demo-dev init        # Create config file
+demo-dev doctor      # Check environment
+demo-dev config      # Show config
+demo-dev providers   # List AI/TTS providers
+demo-dev comment     # Post as PR comment
 ```
 
-## When to use manual plans
+## When to use prompt vs diff mode
 
-Use a manual plan when:
-- the feature is behind auth or deep navigation
-- the planner cannot infer the correct route from diff
-- the user wants a specific product moment, such as AI editing, onboarding, settings, inbox, or dashboards
-- the user wants a more launch-style product film rather than raw replay
-
-Place plans in an artifacts folder such as:
-
-```bash
-artifacts/manual-plan.json
-```
-
-Then run capture / manifest / render around that plan.
-
-See [references/recipes.md](references/recipes.md).
+| Mode | When to use |
+|------|-------------|
+| `--prompt "..."` | Feature demos, product tours, any app you can reach via URL |
+| No prompt (diff) | PR walkthroughs, auto-detected from code changes |
 
 ## Recommended agent behavior
 
-1. Prefer stable, product-facing flows over exhaustive QA coverage.
-2. For the same route, keep one screen object and move the camera instead of cutting to a new screen.
-3. Prefer stable states over loading transitions.
-4. If auth is required, verify storage state early.
-5. If planner output is weak, create a tighter manual plan instead of forcing bad automation.
-6. Keep copy concise and product-first.
+1. Prefer prompt-driven mode — it works with any web app, no git repo needed.
+2. Use `--frame` for polished output.
+3. If auth is required, run `demo-dev auth` first.
+4. If AI-generated selectors fail, the system auto-retries with fuzzy matching.
+5. Keep narration conversational and product-focused.
+6. For best voice quality, set `DEMO_TTS_PROVIDER=elevenlabs`.
 
-## Core commands
+## Outputs
 
-Preferred first-class CLI:
+- `artifacts/pr-demo.mp4` — the final video
+- `artifacts/demo-plan.json` — AI-generated scene plan
+- `artifacts/visual-plan.json` — zoom keyframes + speed ramps
+- `artifacts/voice-script.json` — narration text + audio paths
+- `artifacts/continuous-capture.json` — recording metadata
 
-```bash
-demo-dev config
-demo-dev providers
-demo-dev plan
-demo-dev probe
-demo-dev auth:bootstrap --email you@example.com --password 'your-password'
-demo-dev capture
-demo-dev voice
-demo-dev manifest
-demo-dev render --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-demo-dev comment --output-dir artifacts --pr-number 123
-demo-dev pr-demo
-```
-
-Repo-local fallback:
-
-```bash
-npm run config
-npm run providers
-npm run plan
-npm run probe
-npm run auth:bootstrap
-npm run capture
-npm run voice
-npm run manifest
-npm run render -- --manifest artifacts/render-manifest.json --out artifacts/pr-demo.mp4
-npm run comment -- --output-dir artifacts --pr-number 123
-npm run pr-demo
-```
-
-## Outputs to check
-
-- `artifacts/demo-context.json`
-- `artifacts/demo-plan.initial.json`
-- `artifacts/page-probes.json`
-- `artifacts/demo-plan.json`
-- `artifacts/captures.json`
-- `artifacts/render-manifest.json`
-- `artifacts/pr-demo.mp4`
-
-## Troubleshooting
-
-- If the app requires auth, run `auth:bootstrap` first.
-- If the video is wrong, inspect `captures.json` and `render-manifest.json` before changing renderer code.
-- If the planner misses the feature, create a manual plan.
-- If the route is unstable, add project hints in config.
-
-## Share this skill
-
-Other users can install this repo as a pi package or point pi at this repo's `skills/` directory.
-
-Example:
-
-```bash
-pi install /absolute/path/to/demo.dev
-```
-
-or
-
-```bash
-pi install git:github.com/your-org/demo.dev
-```
+See [references/configuration.md](references/configuration.md) and [references/recipes.md](references/recipes.md).
