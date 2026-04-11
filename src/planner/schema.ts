@@ -9,6 +9,21 @@ const actionTargetSchema = z.discriminatedUnion("strategy", [
   z.object({ strategy: z.literal("role"), role: z.string(), name: z.string().optional(), exact: z.boolean().optional() }),
 ]);
 
+const focusRegionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  width: z.number(),
+  height: z.number(),
+  label: z.string().optional(),
+});
+
+const sceneDirectionSchema = z.object({
+  shot: z.enum(["hero", "detail", "workflow"]),
+  focusRegion: focusRegionSchema.optional(),
+  accentColor: z.string().optional(),
+  cameraMove: z.enum(["push-in", "pan-left", "pan-right"]).optional(),
+});
+
 export const sceneActionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("navigate"), url: z.string() }),
   z.object({ type: z.literal("wait"), ms: z.number().int().min(0).max(20000) }),
@@ -33,6 +48,7 @@ export const demoSceneSchema = z.object({
   caption: z.string(),
   durationMs: z.number().int().min(1000).max(30000),
   evidenceHints: z.array(z.string()).default([]),
+  direction: sceneDirectionSchema.optional(),
 });
 
 export const demoPlanSchema = z.object({

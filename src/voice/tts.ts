@@ -48,11 +48,11 @@ const normalizeBaseUrl = (baseUrl: string) => baseUrl.replace(/\/+$/, "");
 const getTtsConfig = (): TtsConfig => {
   return {
     provider: (process.env.DEMO_TTS_PROVIDER as TtsProvider | undefined) ?? "auto",
-    openAiApiKey: process.env.DEMO_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY,
+    openAiApiKey: process.env.DEMO_OPENAI_API_KEY,
     openAiBaseUrl: process.env.DEMO_OPENAI_BASE_URL ?? "https://api.openai.com/v1",
     openAiModel: process.env.DEMO_TTS_MODEL ?? "gpt-4o-mini-tts",
     openAiVoice: process.env.DEMO_TTS_VOICE ?? "alloy",
-    elevenlabsApiKey: process.env.DEMO_ELEVENLABS_API_KEY ?? process.env.ELEVENLABS_API_KEY,
+    elevenlabsApiKey: process.env.DEMO_ELEVENLABS_API_KEY,
     elevenlabsBaseUrl: process.env.DEMO_ELEVENLABS_BASE_URL ?? "https://api.elevenlabs.io/v1",
     elevenlabsVoiceId: process.env.DEMO_ELEVENLABS_VOICE_ID,
     elevenlabsModel: process.env.DEMO_ELEVENLABS_MODEL ?? "eleven_multilingual_v2",
@@ -114,7 +114,7 @@ const writeAudioLine = async (line: VoiceLine, audioPath: string, arrayBuffer: A
 };
 
 const synthesizeOpenAiLine = async (line: VoiceLine, outputDir: string, config: TtsConfig): Promise<VoiceLine> => {
-  if (!config.openAiApiKey) throw new Error("OpenAI TTS not configured");
+  if (!config.openAiApiKey) throw new Error("OpenAI TTS not configured. Set DEMO_OPENAI_API_KEY.");
 
   const response = await fetch(`${normalizeBaseUrl(config.openAiBaseUrl)}/audio/speech`, {
     method: "POST",
@@ -139,7 +139,7 @@ const synthesizeOpenAiLine = async (line: VoiceLine, outputDir: string, config: 
 };
 
 const synthesizeElevenLabsLine = async (line: VoiceLine, outputDir: string, config: TtsConfig): Promise<VoiceLine> => {
-  if (!config.elevenlabsApiKey) throw new Error("ElevenLabs TTS not configured");
+  if (!config.elevenlabsApiKey) throw new Error("ElevenLabs TTS not configured. Set DEMO_ELEVENLABS_API_KEY.");
   if (!config.elevenlabsVoiceId) throw new Error("ElevenLabs voice id not configured");
 
   const voiceSettings = {

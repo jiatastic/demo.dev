@@ -28,7 +28,24 @@ const extractJson = (text: string) => {
   return text.trim();
 };
 
-const runCommand = async (command: string, args: string[]) => {
+const runCommand = async (command: string, args: string[], stdin?: string) => {
+  if (stdin) {
+    const { spawn } = await import("node:child_process");
+    return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+      const child = spawn(command, args, { cwd: process.cwd(), stdio: ["pipe", "pipe", "pipe"] });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.on("data", (d: Buffer) => { stdout += d.toString(); });
+      child.stderr.on("data", (d: Buffer) => { stderr += d.toString(); });
+      child.on("error", reject);
+      child.on("close", (code) => {
+        if (code !== 0) reject(new Error(`${command} exited with ${code}: ${stderr}`));
+        else resolve({ stdout, stderr });
+      });
+      child.stdin.write(stdin);
+      child.stdin.end();
+    });
+  }
   const { stdout, stderr } = await execFileAsync(command, args, {
     cwd: process.cwd(),
     maxBuffer: 1024 * 1024 * 20,
@@ -52,7 +69,7 @@ const getConfig = (): ProviderConfig => ({
 });
 
 const getOpenAiConfig = () => {
-  const apiKey = process.env.DEMO_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY;
+  const apiKey = process.env.DEMO_OPENAI_API_KEY;
   const baseUrl = process.env.DEMO_OPENAI_BASE_URL ?? "https://api.openai.com/v1";
   const model = process.env.DEMO_OPENAI_MODEL ?? process.env.DEMO_AI_MODEL ?? "gpt-4.1-mini";
   return { apiKey, baseUrl, model };
@@ -64,7 +81,7 @@ const requestFromOpenAi = async <T>(options: {
   schema: z.ZodType<T>;
 }) => {
   const config = getOpenAiConfig();
-  if (!config.apiKey) throw new Error("OpenAI API key not configured");
+  if (!config.apiKey) throw new Error("OpenAI API key not configured. Set DEMO_OPENAI_API_KEY.");
 
   const response = await fetch(`${config.baseUrl}/chat/completions`, {
     method: "POST",
@@ -106,12 +123,13 @@ const requestFromCursor = async <T>(options: {
 }) => {
   if (!(await commandExists("cursor-agent"))) throw new Error("cursor-agent not found");
 
-  const fullPrompt = `${options.system}\n\n${options.prompt}`;
+  const stdinContent = `${options.system}\n\n${options.prompt}`;
   const args = ["--print", "--output-format", "json", "--trust", "--mode", "plan"];
   if (options.model) args.push("--model", options.model);
-  args.push(fullPrompt);
+  // Pass prompt via stdin to avoid exceeding argument length limits
+  args.push("-");
 
-  const { stdout } = await runCommand("cursor-agent", args);
+  const { stdout } = await runCommand("cursor-agent", args, stdinContent);
   const payload = JSON.parse(stdout) as { result?: string; is_error?: boolean };
   if (payload.is_error) throw new Error(payload.result ?? "Cursor provider returned error");
   if (!payload.result) throw new Error("Cursor provider returned empty result");
@@ -126,7 +144,7 @@ const requestFromClaude = async <T>(options: {
 }) => {
   if (!(await commandExists("claude"))) throw new Error("claude not found");
 
-  const fullPrompt = `${options.prompt}\n\nReturn strict JSON only.`;
+  const stdinContent = `${options.prompt}\n\nReturn strict JSON only.`;
   const args = [
     "-p",
     "--output-format",
@@ -137,9 +155,10 @@ const requestFromClaude = async <T>(options: {
     "",
   ];
   if (options.model) args.push("--model", options.model);
-  args.push(fullPrompt);
+  // Pass prompt via stdin to avoid exceeding argument length limits
+  args.push("-");
 
-  const { stdout } = await runCommand("claude", args);
+  const { stdout } = await runCommand("claude", args, stdinContent);
   const payload = JSON.parse(stdout) as { result?: string; is_error?: boolean };
   if (payload.is_error) throw new Error(payload.result ?? "Claude provider returned error");
   if (!payload.result) throw new Error("Claude provider returned empty result");

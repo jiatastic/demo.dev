@@ -151,6 +151,32 @@ DEMO_BGM_DUCKING=0.28 \
 demo-dev pr-demo
 ```
 
+### Use AI providers and TTS
+
+`demo.dev` now uses only `DEMO_*` provider keys for its own AI and TTS integrations.
+There is no fallback to generic provider env vars.
+
+```bash
+DEMO_OPENAI_API_KEY=your_openai_key
+DEMO_AI_PROVIDER=openai
+DEMO_TTS_PROVIDER=openai
+
+demo-dev pr-demo
+```
+
+Useful env vars:
+
+- `DEMO_OPENAI_API_KEY`
+- `DEMO_OPENAI_BASE_URL` (optional, defaults to `https://api.openai.com/v1`)
+- `DEMO_OPENAI_MODEL` (planner / AI requests)
+- `DEMO_TTS_PROVIDER` (`auto`, `openai`, `elevenlabs`, `local`)
+- `DEMO_TTS_MODEL` (optional OpenAI TTS model)
+- `DEMO_TTS_VOICE` (optional OpenAI TTS voice)
+- `DEMO_ELEVENLABS_API_KEY`
+- `DEMO_ELEVENLABS_VOICE_ID`
+
+If no cloud TTS provider is configured, `demo.dev` falls back to local speech synthesis tools when available.
+
 ---
 
 ## Outputs
@@ -202,6 +228,7 @@ pi install git:github.com/your-org/demo.dev
 ## Notes
 
 - AI providers currently support `cursor`, `claude`, `codex`, `openai`, and `auto`.
+- Provider keys are intentionally namespaced to `DEMO_*` env vars for explicit, project-local configuration.
 - Local config is intentionally not committed.
 - Publishable config lives in `demo.dev.config.example.json`.
 - Before publishing, you can verify package contents with:

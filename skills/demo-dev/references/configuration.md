@@ -63,6 +63,32 @@ You can override config through:
   - `DEMO_DEV_COMMAND`
   - `DEMO_OUTPUT_DIR`
 
+## AI and TTS environment variables
+
+`demo.dev` uses explicit `DEMO_*` env vars for provider credentials.
+It does not fall back to generic provider keys such as `OPENAI_API_KEY` or `ELEVENLABS_API_KEY`.
+
+Common values:
+
+- `DEMO_OPENAI_API_KEY`
+- `DEMO_OPENAI_BASE_URL`
+- `DEMO_OPENAI_MODEL`
+- `DEMO_AI_PROVIDER`
+- `DEMO_AI_MODEL`
+- `DEMO_TTS_PROVIDER`
+- `DEMO_TTS_MODEL`
+- `DEMO_TTS_VOICE`
+- `DEMO_ELEVENLABS_API_KEY`
+- `DEMO_ELEVENLABS_VOICE_ID`
+
+Example:
+
+```bash
+DEMO_OPENAI_API_KEY=your_openai_key
+DEMO_AI_PROVIDER=openai
+DEMO_TTS_PROVIDER=openai
+```
+
 ## Suggested setup for other repos
 
 1. Copy `demo.dev.config.example.json` into the target repo.

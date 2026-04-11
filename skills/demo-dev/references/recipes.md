@@ -19,6 +19,17 @@ demo-dev auth:bootstrap \
 demo-dev pr-demo
 ```
 
+## Recipe: OpenAI for planning and TTS
+
+```bash
+DEMO_OPENAI_API_KEY=your_openai_key \
+DEMO_AI_PROVIDER=openai \
+DEMO_TTS_PROVIDER=openai \
+demo-dev pr-demo
+```
+
+This repo only reads `DEMO_*` provider keys for AI and TTS credentials.
+
 ## Recipe: inspect plan quality first
 
 ```bash

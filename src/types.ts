@@ -34,21 +34,6 @@ export interface DiffContext {
   diffPreview: string;
 }
 
-export interface FocusRegion {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label?: string;
-}
-
-export interface SceneDirection {
-  shot: "hero" | "detail" | "workflow";
-  focusRegion?: FocusRegion;
-  accentColor?: string;
-  cameraMove?: "push-in" | "pan-left" | "pan-right";
-}
-
 export interface DemoScene {
   id: string;
   title: string;
@@ -63,7 +48,6 @@ export interface DemoScene {
   caption: string;
   durationMs: number;
   evidenceHints: string[];
-  direction?: SceneDirection;
 }
 
 export interface DemoPlan {
@@ -104,31 +88,6 @@ export interface PageProbe {
   followUp?: ProbeSnapshot;
 }
 
-export interface CaptureEvent {
-  type: SceneAction["type"] | "stable";
-  atMs: number;
-  x?: number;
-  y?: number;
-  width?: number;
-  height?: number;
-}
-
-export interface CaptureArtifact {
-  sceneId: string;
-  sceneTitle: string;
-  url: string;
-  screenshotPath: string;
-  screenshotSrc?: string;
-  videoPath?: string;
-  videoSrc?: string;
-  viewport: {
-    width: number;
-    height: number;
-  };
-  title?: string;
-  events?: CaptureEvent[];
-}
-
 export interface VoiceToken {
   text: string;
   startMs: number;
@@ -143,52 +102,4 @@ export interface VoiceLine {
   tokens: VoiceToken[];
   audioPath?: string;
   audioSrc?: string;
-}
-
-export interface RenderScene {
-  id: string;
-  title: string;
-  caption: string;
-  narration: string;
-  durationInFrames: number;
-  leadInFrames?: number;
-  contentFrames?: number;
-  holdFrames?: number;
-  screenshotPath?: string;
-  screenshotSrc?: string;
-  screenshotAssetPath?: string;
-  videoPath?: string;
-  videoSrc?: string;
-  videoAssetPath?: string;
-  videoTrimBeforeFrames?: number;
-  audioPath?: string;
-  audioSrc?: string;
-  audioAssetPath?: string;
-  tokens?: VoiceToken[];
-  direction?: SceneDirection;
-  events?: CaptureEvent[];
-  viewport?: {
-    width: number;
-    height: number;
-  };
-  visualGroupKey?: string;
-}
-
-export interface RenderBgm {
-  path?: string;
-  src?: string;
-  assetPath?: string;
-  volume?: number;
-  ducking?: number;
-  fadeInFrames?: number;
-  fadeOutFrames?: number;
-}
-
-export interface RenderManifest {
-  title: string;
-  fps: number;
-  width: number;
-  height: number;
-  scenes: RenderScene[];
-  bgm?: RenderBgm;
 }

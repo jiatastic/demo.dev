@@ -1,59 +1,77 @@
 {
   "name": "demo-dev",
-  "version": "0.1.0",
-  "description": "Diff-aware PR demo generator for web apps with Playwright capture, Remotion rendering, and an Agent Skill.",
+  "version": "0.2.0",
+  "description": "Diff-aware PR demo generator for web apps with Playwright continuous capture, FFmpeg composition, and an Agent Skill.",
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
-    "demo-dev": "./bin/demo-dev.js"
+    "demo-cli": "./bin/demo-cli.js",
+    "demo-dev": "./bin/demo-cli.js"
   },
   "files": [
     "bin",
+    "dist",
     "src",
     "skills",
     "README.md",
     "demo.dev.config.example.json",
     "tsconfig.json"
   ],
-  "keywords": ["pi-package", "agent-skill", "pr-demo", "remotion", "playwright"],
+  "keywords": [
+    "pi-package",
+    "agent-skill",
+    "pr-demo",
+    "playwright",
+    "ffmpeg",
+    "ghost-cursor"
+  ],
   "engines": {
     "node": ">=20"
   },
   "pi": {
-    "skills": ["./skills"]
+    "skills": [
+      "./skills"
+    ]
   },
   "scripts": {
-    "demo-dev": "node ./bin/demo-dev.js",
+    "build": "tsup src/index.ts --dts --format esm --outDir dist --clean",
+    "demo-cli": "tsx src/cli.ts",
+    "demo": "tsx src/cli.ts demo",
     "init": "tsx src/cli.ts init",
     "doctor": "tsx src/cli.ts doctor",
     "config": "tsx src/cli.ts config",
     "providers": "tsx src/cli.ts providers",
     "plan": "tsx src/cli.ts plan",
     "probe": "tsx src/cli.ts probe",
-    "auth:bootstrap": "tsx src/cli.ts auth:bootstrap",
+    "auth": "tsx src/cli.ts auth",
     "capture": "tsx src/cli.ts capture",
     "voice": "tsx src/cli.ts voice",
-    "manifest": "tsx src/cli.ts manifest",
     "render": "tsx src/cli.ts render",
     "comment": "tsx src/cli.ts comment",
-    "pr-demo": "tsx src/cli.ts pr-demo",
-    "typecheck": "tsc --noEmit",
-    "remotion:studio": "remotion studio src/render/remotion/index.ts"
+    "prepack": "npm run build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remotion/bundler": "^4.0.0",
-    "@remotion/media": "^4.0.0",
-    "@remotion/renderer": "^4.0.0",
+    "@clack/prompts": "^1.2.0",
+    "citty": "^0.2.2",
+    "ghost-cursor-playwright": "^2.1.0",
     "playwright": "^1.52.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "remotion": "^4.0.0",
     "tsx": "^4.19.3",
-    "zod": "3.22.3"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^20.17.30",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
+    "tsup": "^8.5.1",
     "typescript": "^5.8.3"
   }
 }

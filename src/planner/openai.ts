@@ -13,7 +13,7 @@ const responseSchema = z.object({
 });
 
 export const getPlannerConfig = () => {
-  const apiKey = process.env.DEMO_OPENAI_API_KEY ?? process.env.OPENAI_API_KEY;
+  const apiKey = process.env.DEMO_OPENAI_API_KEY;
   const baseUrl = process.env.DEMO_OPENAI_BASE_URL ?? "https://api.openai.com/v1";
   const model = process.env.DEMO_OPENAI_MODEL ?? "gpt-4.1-mini";
   return { apiKey, baseUrl, model };
