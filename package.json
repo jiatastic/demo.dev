@@ -1,7 +1,7 @@
 {
   "name": "demo-dev",
-  "version": "0.2.0",
-  "description": "Diff-aware PR demo generator for web apps with Playwright continuous capture, FFmpeg composition, and an Agent Skill.",
+  "version": "0.0.1-alpha.0",
+  "description": "Generate polished product demo videos with one command. Just give a URL and a prompt.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,8 +15,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "demo-cli": "./bin/demo-cli.js",
-    "demo-dev": "./bin/demo-cli.js"
+    "demo-dev": "bin/demo-cli.js"
   },
   "files": [
     "bin",

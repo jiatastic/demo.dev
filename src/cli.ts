@@ -314,7 +314,7 @@ const demo = defineCommand({
 
 const main = defineCommand({
   meta: {
-    name: "demo-cli",
+    name: "demo-dev",
     version: "0.2.0",
     description: "Turn pull requests into polished product demos",
   },
