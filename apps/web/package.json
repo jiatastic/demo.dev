@@ -1,0 +1,11 @@
+{
+  "name": "@demo-dev/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot src/server.ts",
+    "build": "bun build src/server.ts --outdir dist --target bun",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}

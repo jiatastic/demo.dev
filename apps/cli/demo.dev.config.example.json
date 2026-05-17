@@ -1,0 +1,19 @@
+{
+  "projectName": "My App",
+  "baseUrl": "http://localhost:3000",
+  "readyUrl": "http://localhost:3000",
+  "devCommand": "npm run dev",
+  "outputDir": "artifacts",
+  "storageStatePath": "artifacts/storage-state.json",
+  "saveStorageStatePath": "artifacts/storage-state.json",
+  "preferredRoutes": ["/", "/dashboard"],
+  "featureHints": ["home", "dashboard"],
+  "authRequiredRoutes": ["/dashboard"],
+  "auth": {
+    "loginPath": "/login",
+    "emailTarget": { "strategy": "css", "value": "#email" },
+    "passwordTarget": { "strategy": "css", "value": "#password" },
+    "submitTarget": { "strategy": "role", "role": "button", "name": "Login" },
+    "postSubmitWaitMs": 1500
+  }
+}

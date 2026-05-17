@@ -16,13 +16,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: bun install --frozen-lockfile
 
       - name: Resolve demo config
         run: |
@@ -32,19 +36,19 @@ jobs:
           DEMO_OUTPUT_DIR="${{ vars.DEMO_OUTPUT_DIR || '' }}"
 
           if [ -z "$DEMO_BASE_URL" ]; then
-            DEMO_BASE_URL="$(npm run --silent config -- --field baseUrl)"
+            DEMO_BASE_URL="$(bun run --silent config -- --field baseUrl)"
           fi
 
           if [ -z "$DEMO_READY_URL" ]; then
-            DEMO_READY_URL="$(npm run --silent config -- --field readyUrl)"
+            DEMO_READY_URL="$(bun run --silent config -- --field readyUrl)"
           fi
 
           if [ -z "$DEMO_DEV_COMMAND" ]; then
-            DEMO_DEV_COMMAND="$(npm run --silent config -- --field devCommand)"
+            DEMO_DEV_COMMAND="$(bun run --silent config -- --field devCommand)"
           fi
 
           if [ -z "$DEMO_OUTPUT_DIR" ]; then
-            DEMO_OUTPUT_DIR="$(npm run --silent config -- --field outputDir)"
+            DEMO_OUTPUT_DIR="$(bun run --silent config -- --field outputDir)"
           fi
 
           if [ -z "$DEMO_OUTPUT_DIR" ]; then
@@ -63,7 +67,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Start dev server
         run: |
@@ -74,11 +78,11 @@ jobs:
       - name: Wait for app
         run: |
           if [ -n "$DEMO_READY_URL" ]; then
-            npx wait-on "$DEMO_READY_URL" --timeout 60000
+            bunx wait-on "$DEMO_READY_URL" --timeout 60000
           fi
 
       - name: Build demo assets
-        run: npm run pr-demo -- --base-ref origin/main --output-dir $DEMO_OUTPUT_DIR ${DEMO_BASE_URL:+--base-url $DEMO_BASE_URL}
+        run: bun run demo -- --base-ref origin/main --output-dir $DEMO_OUTPUT_DIR ${DEMO_BASE_URL:+--base-url $DEMO_BASE_URL}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -92,4 +96,4 @@ jobs:
         if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run comment -- --output-dir $DEMO_OUTPUT_DIR
+        run: bun run comment -- --output-dir $DEMO_OUTPUT_DIR

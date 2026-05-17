@@ -10,7 +10,22 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@demo-dev/agent": ["packages/agent/src/index.ts"],
+      "@demo-dev/ai": ["packages/ai/src/index.ts"],
+      "@demo-dev/browser": ["packages/browser/src/index.ts"],
+      "@demo-dev/core": ["packages/core/src/index.ts"],
+      "@demo-dev/director": ["packages/director/src/index.ts"],
+      "@demo-dev/exporter": ["packages/exporter/src/index.ts"],
+      "@demo-dev/planner": ["packages/planner/src/index.ts"],
+      "@demo-dev/quality": ["packages/quality/src/index.ts"],
+      "@demo-dev/render": ["packages/render/src/index.ts"],
+      "@demo-dev/style-presets": ["packages/style-presets/src/index.ts"],
+      "@demo-dev/types": ["packages/types/src/index.ts"],
+      "@demo-dev/voice": ["packages/voice/src/index.ts"]
+    }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["apps/**/*.ts", "packages/**/*.ts"]
 }

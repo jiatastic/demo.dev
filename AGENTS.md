@@ -2,7 +2,7 @@
 
 ## Project overview
 
-This repository is `demo.dev`: a tool that generates polished product demo videos from a URL and a natural language prompt.
+This repository is `demo.dev`: Screen Studio for AI agents. It generates polished product demo videos from a URL and a natural language goal.
 
 Primary goal:
 
@@ -67,6 +67,7 @@ demo-dev capture         # Record only (no voice/render)
 demo-dev voice           # Generate TTS narration only
 demo-dev render          # Capture + voice + compose video
 demo-dev comment         # Post demo as a PR comment
+demo-dev showcase        # Generate a built-in public showcase demo
 ```
 
 ### Primary usage
@@ -83,6 +84,10 @@ demo-dev demo --base-url http://localhost:3000
 # With auth
 demo-dev auth --base-url https://your-app.com --email x@y.com --password '...'
 demo-dev demo --base-url https://your-app.com --prompt "..." --frame
+
+# Public showcase without third-party auth
+bun run showcase:web
+demo-dev showcase --quality high --frame --output-dir artifacts-showcase-sheet
 ```
 
 ---
@@ -90,38 +95,40 @@ demo-dev demo --base-url https://your-app.com --prompt "..." --frame
 ## Important files
 
 ### Core
-- `src/cli.ts` — CLI entry (citty + @clack/prompts)
-- `src/orchestrate.ts` — pipeline composition
-- `src/config/project.ts` — repo-level config loading
+- `apps/cli/src/cli.ts` — CLI entry (citty + @clack/prompts)
+- `apps/cli/src/showcase/sheet.ts` — deterministic spreadsheet showcase plan
+- `apps/web/src/server.ts` — web scaffold and built-in showcase pages
+- `packages/agent/src/orchestrate.ts` — pipeline composition
+- `packages/core/src/config/project.ts` — repo-level config loading
 
 ### Planning
-- `src/planner/prompt.ts` — prompt-driven planner (explores site + AI generates plan)
-- `src/planner/llm.ts` — diff-driven planner
-- `src/planner/index.ts` — planner entry point
-- `src/planner/refine.ts` — plan refinement from page probes
-- `src/planner/schema.ts` — DemoPlan Zod schema
+- `packages/planner/src/planner/prompt.ts` — prompt-driven planner (explores site + AI generates plan)
+- `packages/planner/src/planner/llm.ts` — diff-driven planner
+- `packages/planner/src/planner/index.ts` — planner entry point
+- `packages/planner/src/planner/refine.ts` — plan refinement from page probes
+- `packages/planner/src/planner/schema.ts` — DemoPlan Zod schema
 
 ### Capture
-- `src/capture/continuous-capture.ts` — screencast + ghost-cursor + CSS zoom
-- `src/probe/page-probe.ts` — page element discovery
-- `src/browser/session.ts` — auth/session management
+- `packages/browser/src/capture/continuous-capture.ts` — screencast + ghost-cursor + CSS zoom
+- `packages/browser/src/probe/page-probe.ts` — page element discovery
+- `packages/browser/src/session.ts` — auth/session management
 
 ### Rendering
-- `src/render/ffmpeg-compose.ts` — FFmpeg video composition pipeline
-- `src/render/visual-plan.ts` — zoom keyframes, speed ramps, cursor smoothing
-- `src/render/browser-frame.ts` — Screen Studio-style browser window frame
+- `packages/render/src/ffmpeg-compose.ts` — FFmpeg video composition pipeline
+- `packages/render/src/visual-plan.ts` — zoom keyframes, speed ramps, cursor smoothing
+- `packages/render/src/browser-frame.ts` — Screen Studio-style browser window frame
 
 ### Voice
-- `src/voice/script.ts` — narration text generation
-- `src/voice/tts.ts` — TTS synthesis (ElevenLabs, OpenAI, local)
+- `packages/voice/src/script.ts` — narration text generation
+- `packages/voice/src/tts.ts` — TTS synthesis (ElevenLabs, OpenAI, local)
 
 ### AI
-- `src/ai/provider.ts` — multi-provider AI layer (claude, cursor, codex, openai)
+- `packages/ai/src/provider.ts` — multi-provider AI layer (claude, cursor, codex, openai)
 
 ### Agent support
-- `skills/demo-dev/SKILL.md`
-- `skills/demo-dev/references/configuration.md`
-- `skills/demo-dev/references/recipes.md`
+- `packages/demo-skill/skills/demo-dev/SKILL.md`
+- `packages/demo-skill/skills/demo-dev/references/configuration.md`
+- `packages/demo-skill/skills/demo-dev/references/recipes.md`
 
 ---
 

@@ -13,15 +13,33 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.0
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
+      - run: bun install --frozen-lockfile
 
-      - run: npm run build
+      - run: bun run build
 
-      - run: npm publish --access public
+      - name: Publish packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --workspace @demo-dev/types --access public
+          npm publish --workspace @demo-dev/core --access public
+          npm publish --workspace @demo-dev/ai --access public
+          npm publish --workspace @demo-dev/style-presets --access public
+          npm publish --workspace @demo-dev/exporter --access public
+          npm publish --workspace @demo-dev/browser --access public
+          npm publish --workspace @demo-dev/planner --access public
+          npm publish --workspace @demo-dev/voice --access public
+          npm publish --workspace @demo-dev/render --access public
+          npm publish --workspace @demo-dev/director --access public
+          npm publish --workspace @demo-dev/quality --access public
+          npm publish --workspace @demo-dev/agent --access public
+          npm publish --workspace demo-dev --access public

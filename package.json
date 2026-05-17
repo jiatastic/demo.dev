@@ -1,76 +1,39 @@
 {
-  "name": "demo-dev",
-  "version": "0.0.2-alpha.0",
-  "description": "Generate polished product demo videos with one command. Just give a URL and a prompt.",
+  "name": "demo-dev-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo for demo.dev apps and packages.",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "bin": {
-    "demo-dev": "bin/demo-cli.js"
-  },
-  "files": [
-    "bin",
-    "dist",
-    "src",
-    "skills",
-    "README.md",
-    "demo.dev.config.example.json",
-    "tsconfig.json"
+  "packageManager": "bun@1.3.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
   ],
-  "keywords": [
-    "pi-package",
-    "agent-skill",
-    "pr-demo",
-    "playwright",
-    "ffmpeg",
-    "ghost-cursor"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
-  "pi": {
-    "skills": [
-      "./skills"
-    ]
-  },
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm --outDir dist --clean",
-    "demo-cli": "tsx src/cli.ts",
-    "demo": "tsx src/cli.ts demo",
-    "init": "tsx src/cli.ts init",
-    "doctor": "tsx src/cli.ts doctor",
-    "config": "tsx src/cli.ts config",
-    "providers": "tsx src/cli.ts providers",
-    "plan": "tsx src/cli.ts plan",
-    "probe": "tsx src/cli.ts probe",
-    "auth": "tsx src/cli.ts auth",
-    "capture": "tsx src/cli.ts capture",
-    "voice": "tsx src/cli.ts voice",
-    "render": "tsx src/cli.ts render",
-    "comment": "tsx src/cli.ts comment",
-    "prepack": "npm run build",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@clack/prompts": "^1.2.0",
-    "citty": "^0.2.2",
-    "ghost-cursor-playwright": "^2.1.0",
-    "playwright": "^1.52.0",
-    "tsx": "^4.19.3",
-    "zod": "^4.3.6"
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "dev": "turbo run dev --parallel",
+    "demo-cli": "bun --filter demo-dev demo-cli",
+    "demo": "bun --filter demo-dev demo",
+    "init": "bun --filter demo-dev init",
+    "doctor": "bun --filter demo-dev doctor",
+    "config": "bun --filter demo-dev config",
+    "providers": "bun --filter demo-dev providers",
+    "plan": "bun --filter demo-dev plan",
+    "probe": "bun --filter demo-dev probe",
+    "auth": "bun --filter demo-dev auth",
+    "capture": "bun --filter demo-dev capture",
+    "voice": "bun --filter demo-dev voice",
+    "render": "bun --filter demo-dev render",
+    "comment": "bun --filter demo-dev comment",
+    "showcase": "bun apps/cli/src/cli.ts showcase",
+    "showcase:web": "bun --filter @demo-dev/web dev"
   },
   "devDependencies": {
     "@types/node": "^20.17.30",
     "tsup": "^8.5.1",
-    "typescript": "^5.8.3"
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "wait-on": "^8.0.3"
   }
 }

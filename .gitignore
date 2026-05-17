@@ -5,6 +5,9 @@ public/__demo_assets__/
 tmp/
 .playwright/
 .expect/
+.turbo/
+.ffmpeg-temp/
+**/.ffmpeg-temp/
 demo.dev.config.json
 .DS_Store
 .env

@@ -1,0 +1,74 @@
+{
+  "name": "demo-dev",
+  "version": "0.0.2-alpha.0",
+  "description": "Generate polished product demo videos with one command. Just give a URL and a prompt.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "demo-dev": "bin/demo-dev.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "templates",
+    "README.md",
+    "demo.dev.config.example.json"
+  ],
+  "keywords": [
+    "agent-skill",
+    "pr-demo",
+    "playwright",
+    "ffmpeg",
+    "ghost-cursor",
+    "product-demo"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli.ts --dts --format esm --outDir dist --clean",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "demo-cli": "bun src/cli.ts",
+    "demo": "bun src/cli.ts demo",
+    "init": "bun src/cli.ts init",
+    "doctor": "bun src/cli.ts doctor",
+    "config": "bun src/cli.ts config",
+    "providers": "bun src/cli.ts providers",
+    "plan": "bun src/cli.ts plan",
+    "probe": "bun src/cli.ts probe",
+    "auth": "bun src/cli.ts auth",
+    "capture": "bun src/cli.ts capture",
+    "voice": "bun src/cli.ts voice",
+    "render": "bun src/cli.ts render",
+    "comment": "bun src/cli.ts comment",
+    "showcase": "bun src/cli.ts showcase",
+    "prepack": "bun run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.2.0",
+    "@demo-dev/agent": "0.0.2-alpha.0",
+    "@demo-dev/ai": "0.0.2-alpha.0",
+    "@demo-dev/browser": "0.0.2-alpha.0",
+    "@demo-dev/core": "0.0.2-alpha.0",
+    "@demo-dev/director": "0.0.2-alpha.0",
+    "@demo-dev/exporter": "0.0.2-alpha.0",
+    "@demo-dev/planner": "0.0.2-alpha.0",
+    "@demo-dev/quality": "0.0.2-alpha.0",
+    "@demo-dev/render": "0.0.2-alpha.0",
+    "@demo-dev/style-presets": "0.0.2-alpha.0",
+    "@demo-dev/types": "0.0.2-alpha.0",
+    "@demo-dev/voice": "0.0.2-alpha.0",
+    "citty": "^0.2.2",
+    "playwright": "^1.52.0"
+  }
+}

@@ -1,0 +1,15 @@
+1
+00:00:05,024 --> 00:00:08,847
+Start with a polished public page and let the product promise lead the story.
+
+2
+00:00:16,096 --> 00:00:20,115
+The camera follows real interface moments instead of static marketing copy.
+
+3
+00:00:26,850 --> 00:00:32,251
+For a GitHub README, the same pipeline can capture credibility, workflow, and outcome.
+
+4
+00:00:36,176 --> 00:00:42,435
+The result is a ready-to-share demo video with framing, pacing, captions, voice, and quality checks.

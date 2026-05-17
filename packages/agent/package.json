@@ -1,0 +1,33 @@
+{
+  "name": "@demo-dev/agent",
+  "version": "0.0.2-alpha.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm --outDir dist --clean",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepack": "bun run build"
+  },
+  "dependencies": {
+    "@demo-dev/browser": "0.0.2-alpha.0",
+    "@demo-dev/core": "0.0.2-alpha.0",
+    "@demo-dev/director": "0.0.2-alpha.0",
+    "@demo-dev/exporter": "0.0.2-alpha.0",
+    "@demo-dev/planner": "0.0.2-alpha.0",
+    "@demo-dev/quality": "0.0.2-alpha.0",
+    "@demo-dev/render": "0.0.2-alpha.0",
+    "@demo-dev/style-presets": "0.0.2-alpha.0",
+    "@demo-dev/types": "0.0.2-alpha.0",
+    "@demo-dev/voice": "0.0.2-alpha.0"
+  }
+}

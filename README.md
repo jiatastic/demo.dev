@@ -2,15 +2,71 @@
 
 # demo-dev
 
-### Generate polished product demo videos with one command.
+### Screen Studio for AI agents.
 
-Give a URL and a prompt. Get a narrated, Screen Studio-style video.
+Give a URL and a goal. `demo-dev` operates the product, records the workflow, adds narration, frames the video, and exports a polished demo.
 
 ```bash
-npx demo-dev demo --base-url https://your-app.com --prompt "Show the dashboard and create a new project" --frame
+npx demo-dev demo --base-url https://your-app.com --prompt "Show the dashboard and create a new project" --frame --display-url app.example.com
 ```
 
+[![demo.dev sheet showcase](./public/demo-dev-sheet-showcase-poster.jpg)](./public/demo-dev-sheet-showcase.mp4)
+
 </div>
+
+---
+
+## Monorepo layout
+
+`demo-dev` is organized as a Bun + Turborepo monorepo:
+
+```txt
+apps/
+  cli/        Published `demo-dev` CLI and library facade
+  web/        Website app scaffold and built-in public showcases
+packages/
+  agent/      End-to-end demo pipeline orchestration
+  ai/         AI provider abstraction
+  browser/    Browser runtime: auth, probing, capture, Playwright sessions
+  core/       Config, filesystem, git, and media utilities
+  director/   Automatic visual direction for zooms and pacing
+  exporter/   Aspect ratio, resolution, and capture viewport profiles
+  quality/    Video quality checks and scoring
+  planner/    Demo planning and presentation copy refinement
+  render/     FFmpeg composition and visual planning
+  style-presets/ Visual presets for SaaS, launch, tutorial, and social videos
+  voice/      Narration scripts and TTS generation
+  types/      Shared product/demo types
+  demo-skill/ Agent skill package
+```
+
+This mirrors the same broad separation as Expect, but the domain is demoing rather than testing: browser/runtime code, agent orchestration, rendering, voice, and the CLI can evolve independently.
+
+### Development
+
+```bash
+bun install
+bun run build
+bun run typecheck
+bun run demo -- --base-url https://your-app.com --prompt "Show the dashboard"
+bun --filter @demo-dev/web dev
+```
+
+### Built-in public showcase
+
+The repo includes a controlled spreadsheet-style showcase for generating a README-ready public demo without depending on Google login or third-party app state.
+
+Terminal 1:
+
+```bash
+bun run showcase:web
+```
+
+Terminal 2:
+
+```bash
+bun run showcase -- --quality high --frame --output-dir artifacts-showcase-sheet
+```
 
 ---
 
@@ -67,6 +123,7 @@ demo-dev doctor      # Check environment (ffmpeg, playwright, etc.)
 demo-dev config      # Show resolved config
 demo-dev providers   # List available AI/TTS providers
 demo-dev comment     # Post demo as a PR comment
+demo-dev showcase    # Generate a built-in public showcase demo
 ```
 
 Run `demo-dev <command> --help` for detailed options.
@@ -79,6 +136,7 @@ Run `demo-dev <command> --help` for detailed options.
 |------|-------------|
 | `--prompt "..."` | Natural language description of the demo to create |
 | `--frame` | Wrap video in a browser window with gradient background |
+| `--display-url` | URL label shown in the browser frame |
 | `--quality draft\|standard\|high` | Video quality preset |
 | `--base-url` | URL of the app to demo |
 | `--base-ref` | Git base ref for diff-based planning (default: origin/main) |

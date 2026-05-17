@@ -1,0 +1,19 @@
+1
+00:00:03,005 --> 00:00:10,574
+The AI starts with raw launch data, just like a spreadsheet workflow. It imports the channel metrics and prepares the sheet for analysis.
+
+2
+00:00:12,645 --> 00:00:20,432
+Next it applies formulas across the sheet. Pipeline, activation rate, CAC, and ROI are calculated from the source rows.
+
+3
+00:00:21,102 --> 00:00:28,404
+Then the AI formats the dashboard so the important numbers are easy to scan, with headers, totals, and KPI emphasis.
+
+4
+00:00:31,251 --> 00:00:38,417
+With the model-ready data in place, it creates a visual comparison of channel contribution and highlights the strongest revenue drivers.
+
+5
+00:00:40,668 --> 00:00:48,902
+Finally, it turns the spreadsheet into a clear recommendation: double down on efficient partner and newsletter channels, not just the largest spend.
